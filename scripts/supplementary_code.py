@@ -1,7 +1,7 @@
 import numpy as np
 from sklearn.linear_model import LinearRegression
 
-# logit regression definition
+# logit regression definition (credit: https://stackoverflow.com/questions/44234682/how-to-use-sklearn-when-target-variable-is-a-proportion, MB-F)
 class LogitRegression(LinearRegression):
 
     def fit(self, x, p):
