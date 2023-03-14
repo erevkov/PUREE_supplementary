@@ -12,22 +12,14 @@ class LogitRegression(LinearRegression):
     def predict(self, x):
         y = super().predict(x)
         return 1 / (np.exp(-y) + 1)
-
-# ctype cv generator
-def ctype_cv_generator(gene_expr_train, types_data):
     
-    gene_expr_train_t = gene_expr_train.join(types_data)
-    types = set(gene_expr_train_t.type) # only go through 20 types that are in the training set
-    
-    for ctype in types:
-        
-        test_idx_names = gene_expr_train_t.loc[gene_expr_train_t.type == ctype, :].index
-        test_idx_ints = gene_expr_train_t.index.get_indexer(test_idx_names)
+import tensorflow as tf
+from tensorflow import keras
 
-        train_idx_names = gene_expr_train_t.index.drop(test_idx_names)
-        train_idx_ints = gene_expr_train_t.index.get_indexer(train_idx_names)
-        
-        yield train_idx_ints, test_idx_ints
+from tensorflow.keras import regularizers
+from tensorflow.keras.layers import Dense, Dropout
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.optimizers import Adam
 
 # fcNN definition
 def fcNN(num_features=60000, learning_rate=0.05):
@@ -48,7 +40,7 @@ def fcNN(num_features=60000, learning_rate=0.05):
             Dense(
                 units=units_init,
                 activation='relu',
-               kernel_regularizer=regularizers.l2(0.01),
+                kernel_regularizer=regularizers.l2(0.01),
                 input_dim=num_features))
 
         model.add(Dropout(rate=0.1))
@@ -62,39 +54,8 @@ def fcNN(num_features=60000, learning_rate=0.05):
                 Dense(
                     units=(units_init // units_scaling),
                     activation='relu',
-#                     kernel_regularizer=regularizers.l2(0.001)
                 )
             )
-
-#         # hidden layers
-#         for i in range(1):
-#             model.add(
-#                 Dense(
-#                     units=(units_init // 2),
-#                     activation='relu',
-#                     kernel_regularizer=regularizers.l2(0.01)
-#                 ))
-
-# #             model.add(Dropout(rate=0.1))
-
-#         model.add(
-#             Dense(
-#                 units=(units_init // 4),
-#                 activation='relu',
-#                 kernel_regularizer=regularizers.l2(0.01)
-#             ))
-
-#         model.add(
-#             Dense(
-#                 units=(units_init // 8),
-#                 activation='relu',
-#                 kernel_regularizer=regularizers.l2(0.01)
-#             ))
-
-#         model.add(
-#             Dense(
-#                 units=(units_init // 16),
-#                 activation='relu'))
 
         # output layer
         model.add(Dense(1, activation='sigmoid'))
@@ -108,11 +69,17 @@ def fcNN(num_features=60000, learning_rate=0.05):
     
 ### models definitions ###
 
+from sklearn.experimental import enable_halving_search_cv
+from sklearn.model_selection import HalvingGridSearchCV
+from sklearn.linear_model import LinearRegression, ElasticNetCV, LassoCV, RidgeCV,
+from sklearn.svm import NuSVR
+from sklearn.ensemble import GradientBoostingRegressor
+
 # Linear Regression #
 linreg = LinearRegression()
 
 # Logit Reg #
-model = LogitRegression()
+logitreg = LogitRegression()
 
 # Lasso #
 lasso = LassoCV(n_jobs=n_cpu-1, max_iter=100000, cv=5, 
@@ -126,16 +93,16 @@ ridge = RidgeCV()
 # nuSVR #
 nusvr = HalvingGridSearchCV(estimator=NuSVR(gamma='auto', kernel='rbf', cache_size=1000), 
                 param_grid={'nu':[0.001, 0.01, 0.1, 0.5, 1], 
-                            'C':[0.001, 0.01, 0.1, 1, 10]}, # adjusted
+                            'C':[0.001, 0.01, 0.1, 1, 10]},
                  cv=5,
                  factor=3,
-                 scoring='neg_mean_squared_error', # changed
+                 scoring='neg_mean_squared_error',
                  n_jobs=n_cpu-1,
                  verbose=3,
                  error_score='raise'
                 )
 
-# Gradient Boosting Regressor #
+# Gradient Boosting Regressor 
 gradboost = HalvingGridSearchCV(estimator=GradientBoostingRegressor(), 
                     param_grid={'max_depth':np.arange(1, 101, 1)},
                      cv=5,
@@ -144,4 +111,4 @@ gradboost = HalvingGridSearchCV(estimator=GradientBoostingRegressor(),
                     )
 
 # fcNN #
-fcnn = fcNN(num_features=gene_expression_data.shape[1]) # epochs 6, batch size 1
+fcnn = fcNN(num_features=gene_expression_data.shape[1])

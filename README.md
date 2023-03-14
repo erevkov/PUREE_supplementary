@@ -8,4 +8,4 @@ This repository contains Supplementary files for the "Accurate pan-cancer tumor 
 
 /plots/ contains .pdf figures created with the notebooks.
 
-/scripts/ contains various snippets of code used for the paper (including the code used to benchmark external transcriptomics-based methods and the definitions of machine learning models tested during development).
+/scripts/ contains various snippets of code used for the paper (the code used to benchmark external transcriptomics-based methods and the definitions of machine learning models tested during development).
