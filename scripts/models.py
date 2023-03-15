@@ -1,7 +1,7 @@
 import numpy as np
 from sklearn.linear_model import LinearRegression
 
-# logit regression definition (credit: https://stackoverflow.com/questions/44234682/how-to-use-sklearn-when-target-variable-is-a-proportion, MB-F)
+# logit regression definition (credit: https://stackoverflow.com/questions/44234682/how-to-use-sklearn-when-target-variable-is-a-proportion)
 class LogitRegression(LinearRegression):
 
     def fit(self, x, p):
@@ -13,9 +13,6 @@ class LogitRegression(LinearRegression):
         y = super().predict(x)
         return 1 / (np.exp(-y) + 1)
     
-import tensorflow as tf
-from tensorflow import keras
-
 from tensorflow.keras import regularizers
 from tensorflow.keras.layers import Dense, Dropout
 from tensorflow.keras.models import Sequential
